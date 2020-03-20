@@ -1,0 +1,37 @@
+plugins {
+    id "io.saagie.gradle-saagie-dataops-plugin" version "1.1.68"
+    id 'net.saliman.properties' version '1.5.1'
+}
+
+def saagiePlatform =  (environmentName == 'prod') ? 2 : 1
+
+ext.commit_message = System.getenv('CI_COMMIT_MESSAGE') + " - "+  System.getenv('CI_PROJECT_URL') + "/-/commit/" + System.getenv('CI_COMMIT_SHA')
+ext.is_ci = System.getenv('CI')
+
+def releaseMessage = (is_ci != null) ? commit_message : "WIP"
+
+saagie {
+   server {
+        url = TODO
+        login = System.getenv('SAAGIE_LOGIN')
+        password = System.getenv('SAAGIE_PWD')
+        environment = saagiePlatform
+    }
+    project {
+        id = saagieProjectId
+    }
+
+    pipeline {
+          id = saagiePipelineId
+          name = 'Collect and Process'
+          description = 'Collect and Process pipeline'
+          isScheduled = false
+        }
+
+    pipelineVersion {
+      releaseNote = releaseMessage
+      jobs = [saagieJobIdCollect,saagieJobIdProcess]
+    }
+}
+
+projectsRunPipeline.dependsOn(projectsUpdatePipeline)

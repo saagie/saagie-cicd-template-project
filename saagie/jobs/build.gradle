@@ -1,0 +1,51 @@
+plugins {
+    id "io.saagie.gradle-saagie-dataops-plugin" version "1.1.68"
+    id 'net.saliman.properties' version '1.5.1'
+}
+
+
+ext.commit_message = System.getenv('CI_COMMIT_MESSAGE') + " - "+  System.getenv('CI_PROJECT_URL') + "/-/commit/" + System.getenv('CI_COMMIT_SHA')
+ext.is_ci = System.getenv('CI')
+
+
+def releaseMessage = (is_ci != null) ? commit_message : "WIP"
+def saagieProjectId =  (env == 'prod') ? saagieProjectIdProd : saagieProjectIdDev
+def saagieJobId =  (env == 'prod') ? saagieJobIdProd : saagieJobIdDev
+def saagiePlatform =  (env == 'prod') ? 2 : 1
+
+task packageCode(type: Zip) {
+    archiveFileName = "${jobPath}.zip"
+    destinationDirectory = file("/tmp/saagie")
+    from "../../code/${jobPath}"
+}
+
+
+saagie {
+    server {
+        url = TODO
+        login = System.getenv('SAAGIE_LOGIN')
+        password = System.getenv('SAAGIE_PWD')
+        environment = saagiePlatform
+    }
+    project {
+        id = saagieProjectId
+    }
+    job {
+          id = saagieJobId
+          name = saagieJobName
+          description = saagieJobDescription
+          isScheduled = false
+        }
+    jobVersion {
+        commandLine = commandLine
+        releaseNote = releaseMessage
+        runtimeVersion = saagieJobPythonVersion
+        packageInfo {
+            name = "/tmp/saagie/${jobPath}.zip"
+        }
+    }
+}
+
+
+projectsUpdateJob.dependsOn(packageCode)
+projectsRunJob.dependsOn(projectsUpdateJob)

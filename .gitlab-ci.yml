@@ -1,0 +1,37 @@
+image: gradle:alpine
+
+stages:
+  - test
+  - deploy
+
+unit tests:
+  tags:
+    - docker
+  stage: test
+  script:
+    - echo test
+  only:
+    - develop
+    - master
+
+deploy job to dev:
+  tags:
+    - docker
+  stage: deploy
+  script:
+    - gradle -b saagie/jobs/build.gradle projectsUpdateJob -PjobName=collect -Penv=dev
+    - gradle -b saagie/jobs/build.gradle projectsUpdateJob -PjobName=process -Penv=dev
+    - gradle -b saagie/pipeline/build.gradle projectsUpdatePipeline -PenvironmentName=dev
+  only:
+    - develop
+
+deploy job to prod:
+  tags:
+    - docker
+  stage: deploy
+  script:
+    - gradle -b saagie/jobs/build.gradle projectsUpdateJob -PjobName=collect -Penv=prod
+    - gradle -b saagie/jobs/build.gradle projectsUpdateJob -PjobName=process -Penv=prod
+    - gradle -b saagie/pipeline/build.gradle projectsUpdatePipeline -PenvironmentName=prod
+  only:
+    - master
