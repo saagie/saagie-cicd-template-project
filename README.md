@@ -1,7 +1,7 @@
 # Saagie project
 
-This is a template Python project with Gradle plugin and Gitlab CI/CD configured.
-This fake Python project is made of 2 fake jobs (Collect and Process) and a pipeline.
+This is a template project with Gradle plugin and Gitlab CI/CD configured.
+This fake Python project is made of 2 fake python jobs (Collect and Process), a pipeline associating both of them, and a third pyspark job (spark_job).
  
 
 ### Usage
@@ -14,7 +14,7 @@ For that, you'll need to specifiy the URL or your Saagie platform along with the
 #### For the jobs
 Under the `saagie/jobs` directory : 
 
-`gradle packageCode -PjobName=<collect|process> -Penv=<dev|prod>` to zip your Python code
+`gradle packageCode -PjobName=<collect|process|spark_job> -Penv=<dev|prod>` to zip your Python code
 
 `gradle projectsUpdateJob -PjobName=<jobname> -Penv=<dev|prod>` to update your job on Saagie (will first package your code)
 
