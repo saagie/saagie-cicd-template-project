@@ -12,6 +12,8 @@ def releaseMessage = (is_ci != null) ? commit_message : "WIP"
 def saagieProjectId =  (env == 'prod') ? saagieProjectIdProd : saagieProjectIdDev
 def saagieJobId =  (env == 'prod') ? saagieJobIdProd : saagieJobIdDev
 def saagiePlatform =  (env == 'prod') ? 2 : 1
+def saagieExtraTechnologyLanguage = (saagieJobType == 'spark') ? saagieExtraTechnologyLanguage : null
+def saagieExtraTechnologyVersion = (saagieJobType == 'spark') ? saagieExtraTechnologyVersion : null
 
 task packageCode(type: Zip) {
     archiveFileName = "${jobPath}.zip"
@@ -39,7 +41,11 @@ saagie {
     jobVersion {
         commandLine = commandLine
         releaseNote = releaseMessage
-        runtimeVersion = saagieJobPythonVersion
+        runtimeVersion = saagieJobRuntimeVersion
+        extraTechnology {
+            language = saagieExtraTechnologyLanguage
+            version = saagieExtraTechnologyVersion
+        }
         packageInfo {
             name = "/tmp/saagie/${jobPath}.zip"
         }

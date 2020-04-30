@@ -21,6 +21,7 @@ deploy job to dev:
   script:
     - gradle -b saagie/jobs/build.gradle projectsUpdateJob -PjobName=collect -Penv=dev
     - gradle -b saagie/jobs/build.gradle projectsUpdateJob -PjobName=process -Penv=dev
+    - gradle -b saagie/jobs/build.gradle projectsUpdateJob -PjobName=spark_job -Penv=dev
     - gradle -b saagie/pipeline/build.gradle projectsUpdatePipeline -PenvironmentName=dev
   only:
     - develop
@@ -32,6 +33,7 @@ deploy job to prod:
   script:
     - gradle -b saagie/jobs/build.gradle projectsUpdateJob -PjobName=collect -Penv=prod
     - gradle -b saagie/jobs/build.gradle projectsUpdateJob -PjobName=process -Penv=prod
+    - gradle -b saagie/jobs/build.gradle projectsUpdateJob -PjobName=spark_job -Penv=prod
     - gradle -b saagie/pipeline/build.gradle projectsUpdatePipeline -PenvironmentName=prod
   only:
     - master
