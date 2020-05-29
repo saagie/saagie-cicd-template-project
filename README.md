@@ -2,6 +2,7 @@
 
 This is a template project with Gradle plugin and Gitlab CI/CD configured.
 This fake Python project is made of 2 fake python jobs (Collect and Process), a pipeline associating both of them, and a third pyspark job (spark_job).
+Code dependances between jobs can be managed using the 'code/dependencies' folder. All files inside this folder will be added alongside the code in the zip archive of every job. So every modules and python packages it contains can be imported and used inside all jobs (cf examples in code/process/\_\_main\_\_.py and code/collect/\_\_main\_\_.py). If not needed, the dependencies folder can just be deleted.
  
 
 ### Usage
