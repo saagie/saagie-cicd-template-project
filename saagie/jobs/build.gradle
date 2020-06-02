@@ -18,7 +18,7 @@ def saagieExtraTechnologyVersion = (saagieJobType == 'spark') ? saagieExtraTechn
 task packageCode(type: Zip) {
     archiveFileName = "${jobPath}.zip"
     destinationDirectory = file("/tmp/saagie")
-    from "../../code/${jobPath}"
+    from "../../code/${jobPath}", "../../code/dependencies"
 }
 
 
