@@ -37,3 +37,9 @@ To update this behavior, simply update the `.gitlab-ci.yml` file
 ### Release note
 The release note is automatically set based on the latest commit message and the commit id.
 To update this behavior, simply update the `build.gradle` files
+
+
+# Saagie Python cli
+
+The saagie-python-cli folder contains a python client aiming to automatize tasks following the saagie-cicd-template-project like creating a project or creating a job.
+See README.md file inside the folder for more detail.
