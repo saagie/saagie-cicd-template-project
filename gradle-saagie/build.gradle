@@ -3,18 +3,6 @@ plugins {
     id 'net.saliman.properties' version '1.5.1'
 }
 
-/*
-def jobId =  (job == 'read') ? saagieJobReadJson.toInteger() : \
-            (job == 'treat') ? saagieJobTreatData.toInteger() : \
-             (job == 'sql') ? saagieJobMySql.toInteger() : 0
-
-def commandJob =  (job == 'read') ? commandJobReadJson : \
-                   (job == 'treat') ? commandJobTreatData : \
-                    (job == 'sql') ? commandJobMySql : 0
-println "Updating Job: "
-println jobId.toInteger()
- */
-
 task packageCode(type: Exec) {
     workingDir "$projectDir/.."
     commandLine 'sh', '-c', 'sbt assembly' //'cmd', '/c', 'sbt assembly'
@@ -30,7 +18,7 @@ saagie {
     }
     jobs {[
         {
-            id = saagieJobReadJson.toInteger()
+            id = saagieJob1.toInteger()
             type = "spark"
             language = 'java'
             category = 'processing'
@@ -39,10 +27,10 @@ saagie {
             cpu = 2
             memory = 4096
             disk = 4096
-            template = commandJobReadJson
+            template = commandJob1
         },
         {
-            id = saagieJobMySql.toInteger()
+            id = saagieJob2.toInteger()
             type = "spark"
             language = 'java'
             category = 'processing'
@@ -51,22 +39,10 @@ saagie {
             cpu = 2
             memory = 4096
             disk = 4096
-            template = commandJobMySql
-        },
-        {
-            id = saagieJobImpala.toInteger()
-            type = "spark"
-            language = 'java'
-            category = 'processing'
-            languageVersion = '8.131'
-            sparkVersion = '2.3.0'
-            cpu = 2
-            memory = 4096
-            disk = 4096
-            template = commandJobImpala
+            template = commandJob2
         }
     ]}
-    fileName = "../target/scala-2.11/dn_data-assembly-1.0.jar"
+    fileName = "../target/scala-2.11/template_cicd_scala-assembly-1.0.jar"
 }
 
 updateJob.dependsOn(packageCode)
