@@ -31,4 +31,4 @@ deploy to prod:
     - cd gradle-saagie
     - ./gradlew updateJob -PenvironmentName=prod
   only:
-    - template_project_scala
+    - none
