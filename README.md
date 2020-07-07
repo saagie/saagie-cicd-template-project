@@ -15,8 +15,8 @@ Configuration of the `gradle-<dev|prod>.properties` file:
 - ID of jobs (Findable in the URL (https://saagie-manager.prod.saagie.io/manager/platform/6/#/manager/6/job/1 => ID of job is 1))
 - Command of the jobs (e.g. HADOOP_USER_NAME=hdfs spark-submit --executor-memory 4G --executor-cores 2 --driver-memory 2G --total-executor-cores 4 --class=io.saagie.spark.template_test {file})
 - The credentials inside environment variables : 
-* SAAGIE_LOGIN
-* SAAGIE_PWD
+    * SAAGIE_LOGIN
+    * SAAGIE_PWD
 
 #### For the jobs
 Under the `saagie` directory : 
