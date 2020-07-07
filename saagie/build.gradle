@@ -5,7 +5,7 @@ plugins {
 
 task packageCode(type: Exec) {
     workingDir "$projectDir/.."
-    commandLine 'sh', '-c', 'sbt assembly' //'cmd', '/c', 'sbt assembly'
+    commandLine 'sh', '-c', 'sbt assembly' // For Windows, use: 'cmd', '/c', 'sbt assembly'
 }
 
 
