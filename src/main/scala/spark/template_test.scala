@@ -1,4 +1,4 @@
-package io.saagie.vallourec.spark
+package spark
 
 import com.typesafe.config.{Config, ConfigFactory}
 import org.slf4j.{Logger, LoggerFactory}
