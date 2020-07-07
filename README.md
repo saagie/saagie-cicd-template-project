@@ -11,13 +11,13 @@ This fake Scala / Spark project is made of 2 fake scala jobs.
 
 In order to work, you need to update the saagie gradle configuration (`saagie/build.gradle` and `gradle-<dev|prod>.properties`).
 Configuration of the `saagie/build.gradle` file:
-- fileName: change the filename with the correct jar path (e.g. "../target/scala-<scala_version>/<name>-<version>.jar")
+- fileName: change the filename with the correct jar path (e.g. `../target/scala-<scala_version>/<name>-<version>.jar`)
 <br>
 
 Configuration of the `gradle-<dev|prod>.properties` file:
 - URL of the platform (e.g. https://saagie-manager.prod.saagie.io/manager)
 - ID of the platform (https://saagie-manager.prod.saagie.io/manager/platform/6 => ID of platform is 6)
-- ID of jobs (Findable in the URL (https://saagie-manager.prod.saagie.io/manager/platform/6/#/manager/6/job/1 => ID of job is 1))
+- ID of jobs (Findable in the URL: https://saagie-manager.prod.saagie.io/manager/platform/6/#/manager/6/job/1 => ID of job is 1)
 - Command of the jobs (e.g. HADOOP_USER_NAME=hdfs spark-submit --executor-memory 4G --executor-cores 2 --driver-memory 2G --total-executor-cores 4 --class=io.saagie.spark.template_test {file})
 - The credentials inside environment variables : 
     * SAAGIE_LOGIN
