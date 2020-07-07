@@ -1,4 +1,4 @@
-package spark
+package io.saagie.spark
 
 import com.typesafe.config.{Config, ConfigFactory}
 import org.slf4j.{Logger, LoggerFactory}
