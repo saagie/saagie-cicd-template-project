@@ -1,2 +1,0 @@
-$subfolder=$args[0]
-docker run --name python-saagie-docker -d --rm -it -v "C:\Users\Nicolas Renard\AppData\Roaming\Sublime Text 3\Packages\Anaconda:/opt/anaconda" -v "$pwd\app\${subfolder}:/opt/spark/work-dir" -v "$pwd\app\utils:/opt/spark/work-dir/utils" -p 9999:9999 saagie/spark:2.4.202004.103.1-py-3.6 /opt/anaconda/anaconda_server/docker/start python 9999 docker_project

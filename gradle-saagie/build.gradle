@@ -1,0 +1,73 @@
+plugins {
+    id 'io.saagie.gradle-saagie-plugin' version '2.2.1'
+    id 'net.saliman.properties' version '1.5.1'
+}
+
+/*
+def jobId =  (job == 'read') ? saagieJobReadJson.toInteger() : \
+            (job == 'treat') ? saagieJobTreatData.toInteger() : \
+             (job == 'sql') ? saagieJobMySql.toInteger() : 0
+
+def commandJob =  (job == 'read') ? commandJobReadJson : \
+                   (job == 'treat') ? commandJobTreatData : \
+                    (job == 'sql') ? commandJobMySql : 0
+println "Updating Job: "
+println jobId.toInteger()
+ */
+
+task packageCode(type: Exec) {
+    workingDir "$projectDir/.."
+    commandLine 'sh', '-c', 'sbt assembly' //'cmd', '/c', 'sbt assembly'
+}
+
+
+saagie {
+    server {
+        url = urlPlatform
+        login = System.getenv(nameEnvVarloginPlatform)
+        password = System.getenv(nameEnvVarpasswordPlatform)
+        platform = saagieEnvironment
+    }
+    jobs {[
+        {
+            id = saagieJobReadJson.toInteger()
+            type = "spark"
+            language = 'java'
+            category = 'processing'
+            languageVersion = '8.131'
+            sparkVersion = '2.3.0'
+            cpu = 2
+            memory = 4096
+            disk = 4096
+            template = commandJobReadJson
+        },
+        {
+            id = saagieJobMySql.toInteger()
+            type = "spark"
+            language = 'java'
+            category = 'processing'
+            languageVersion = '8.131'
+            sparkVersion = '2.3.0'
+            cpu = 2
+            memory = 4096
+            disk = 4096
+            template = commandJobMySql
+        },
+        {
+            id = saagieJobImpala.toInteger()
+            type = "spark"
+            language = 'java'
+            category = 'processing'
+            languageVersion = '8.131'
+            sparkVersion = '2.3.0'
+            cpu = 2
+            memory = 4096
+            disk = 4096
+            template = commandJobImpala
+        }
+    ]}
+    fileName = "../target/scala-2.11/dn_data-assembly-1.0.jar"
+}
+
+updateJob.dependsOn(packageCode)
+runJob.dependsOn(updateJob)
