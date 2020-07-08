@@ -4,6 +4,7 @@ template_project_scala Branch: Spark Scala Gradle and gitlab CI/CD template
 
 # Saagie project
 
+This project template is compatible with the manager (V1) of Saagie.
 This is a template project with Gradle plugin and Gitlab CI/CD configured.
 This fake Scala / Spark project is made of 2 fake scala jobs. 
 
