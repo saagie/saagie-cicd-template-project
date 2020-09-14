@@ -204,13 +204,6 @@ def addJob(name, path=None, technology='python', category='Processing',
     if path.joinpath("app/name").exists():
         raise ValueError("There is already a job '{name}' in '{path}/app/'")
 
-    # Create job folder in 'app'
-    path_to_copy = Path(__file__).parent.joinpath(f'job-base/{technology}')
-    write_path = path.joinpath(f"app/{name}")
-
-    shutil.copytree(str(path_to_copy), str(write_path),
-                    copy_function=shutil.copy)
-
     # Load project properties
     with path.joinpath('saagie-properties.json').open() as f:
         saagie_prop = json.load(f)
@@ -253,6 +246,13 @@ def addJob(name, path=None, technology='python', category='Processing',
                             extra_technology_version=extra_technology_version)
 
     job_id = job['data']['createJob']['id']
+
+    # Create job folder in 'app'
+    path_to_copy = Path(__file__).parent.joinpath(f'job-base/{technology}')
+    write_path = path.joinpath(f"app/{name}")
+
+    shutil.copytree(str(path_to_copy), str(write_path),
+                    copy_function=shutil.copy)
 
     # Create specific files
     path_to_copy = Path(__file__).parent.joinpath('job-template-files/')

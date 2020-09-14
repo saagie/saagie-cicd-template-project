@@ -11,6 +11,8 @@ ext.is_ci = System.getenv('CI')
 def releaseMessage = (is_ci != null) ? commit_message : "WIP"
 def saagieProjectId =  (env == 'prod') ? saagieProjectIdProd : saagieProjectIdDev
 def saagieJobId =  (env == 'prod') ? saagieJobIdProd : saagieJobIdDev
+// You can get Saagie Platform IDs from Saagie URL
+// https://base_url/projects/platform/[ID_PLATFORM]/project/[ID_PROJECT]/job/[ID_JOB]
 def saagiePlatform =  (env == 'prod') ? 2 : 1
 def saagieJobIsScheduled = (saagieJobIsScheduled == 'true') ? true : false
 def saagieJobCronScheduling = (saagieJobIsScheduled == true) ? saagieJobCronScheduling : null
@@ -23,13 +25,15 @@ task packageCode(type: Zip) {
     from "../../code/${jobPath}", "../../code/dependencies"
 }
 
-
+// The "url" value to fill is the base URL from Saagie. Everything before 
+// "/projects/platform" when you're on the 'projects' module (including "https://")
 saagie {
     server {
         url = TODO
         login = System.getenv('SAAGIE_LOGIN')
         password = System.getenv('SAAGIE_PWD')
         environment = saagiePlatform
+        jwt = true
     }
     project {
         id = saagieProjectId
