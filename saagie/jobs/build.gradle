@@ -30,6 +30,7 @@ saagie {
         login = System.getenv('SAAGIE_LOGIN')
         password = System.getenv('SAAGIE_PWD')
         environment = saagiePlatform
+        jwt = true
     }
     project {
         id = saagieProjectId
