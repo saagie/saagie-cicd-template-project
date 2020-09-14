@@ -1,6 +1,6 @@
 .gradle
 .idea
 saagie/jobs/dist/
-saagie-python-cli/*.sublime-workspace
-saagie-python-cli/*.sublime-project
+**/*.sublime-workspace
+**/*.sublime-project
 saagie-python-cli/saagie-properties.json
