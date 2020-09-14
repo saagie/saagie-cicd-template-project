@@ -12,6 +12,8 @@ def releaseMessage = (is_ci != null) ? commit_message : "WIP"
 def saagieProjectId =  (env == 'prod') ? saagieProjectIdProd : saagieProjectIdDev
 def saagieJobId =  (env == 'prod') ? saagieJobIdProd : saagieJobIdDev
 def saagiePlatform =  (env == 'prod') ? 2 : 1
+def saagieJobIsScheduled = (saagieJobIsScheduled == 'true') ? true : false
+def saagieJobCronScheduling = (saagieJobIsScheduled == true) ? saagieJobCronScheduling : null
 def saagieExtraTechnologyLanguage = (saagieJobType == 'spark') ? saagieExtraTechnologyLanguage : null
 def saagieExtraTechnologyVersion = (saagieJobType == 'spark') ? saagieExtraTechnologyVersion : null
 
@@ -36,7 +38,8 @@ saagie {
           id = saagieJobId
           name = saagieJobName
           description = saagieJobDescription
-          isScheduled = false
+          isScheduled = saagieJobIsScheduled
+          cronScheduling = saagieJobCronScheduling
         }
     jobVersion {
         commandLine = commandLine
