@@ -89,13 +89,21 @@ def createProject(name, path=None, ide=None):
 
     for p in path_to_copy.iterdir():
         if p.is_dir():
-            shutil.copytree(str(p), str(path.joinpath(p.name)),
-                            copy_function=shutil.copy)
+            shutil.copytree(str(p),
+                            str(path.joinpath(p.name)),
+                            copy_function=shutil.copy,
+                            ignore=lambda scr, names: ['.gitkeep'])
         elif p.is_file():
             shutil.copy(str(p), str(path))
         else:
             print('An element in project-base is neither a file nor a '
                   f'directory : {str(p)}. Not supposed to happen')
+
+    # Create Git specific files
+    path_to_copy = Path(__file__).parent.joinpath('project-git')
+
+    for p in path_to_copy.iterdir():
+        shutil.copy(str(p), str(path))
 
     # Load project properties
     with path.joinpath('saagie-properties.json').open() as f:
