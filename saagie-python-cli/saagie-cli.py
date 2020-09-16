@@ -23,6 +23,14 @@ def main():
                               "project or add job into. Default to current "
                               "python location"))
 
+    parser.add_argument("-m", "--module",
+                        help=("Saagie module to choose for the project or "
+                              "the job: 'projects' (v2), 'manager' (v1) (or "
+                              "'both' for createProject operation only). "
+                              "Default to 'projects'"),
+                        choices=['projects', 'manager', 'both'],
+                        default='projects')
+
     parser.add_argument("-t", "--technology",
                         help=("Job'technology (python, pyspark, ...). "
                               "Only for 'addJob'"),
@@ -51,7 +59,10 @@ def main():
 
     # Manage options
     if args.action == 'createProject':
-        createProject(name=args.name, path=args.projectPath, ide=args.ide)
+        createProject(name=args.name,
+                      path=args.projectPath,
+                      module=args.module,
+                      ide=args.ide)
 
     if args.action == 'addJob':
         addJob(name=args.name, path=args.projectPath,
@@ -59,7 +70,7 @@ def main():
                ide=args.ide, cicd=args.cicd)
 
 
-def createProject(name, path=None, ide=None):
+def createProject(name, path=None, module='projects', ide=None):
     if not path:
         path = './'
 
@@ -113,8 +124,8 @@ def createProject(name, path=None, ide=None):
     path_to_copy = Path(__file__).parent.joinpath('project-template-files')
 
     for file in path_to_copy.iterdir():
-        # Build.gradle
-        if file.name == 'build.gradle':
+        # Build.gradle (build v2)
+        if (file.name == 'build.gradle') and (module in ['projects', 'both']):
             write_path = path.joinpath('saagie/jobs').joinpath(file.name)
 
             with file.open(mode='r', encoding='utf-8') as f:
@@ -122,6 +133,19 @@ def createProject(name, path=None, ide=None):
 
             with write_path.open(mode='w', encoding='utf-8') as f:
                 f.write(content.format(saagie_prop['url'],
+                                       saagie_prop['saagie_user_env_name'],
+                                       saagie_prop['saagie_pwd_env_name'],
+                                       saagie_prop['platform_id']))
+
+        # Build_manager.gradle (build v1)
+        elif (file.name == 'build_manager.gradle') and (module in ['manager', 'both']):
+            write_path = path.joinpath('saagie/jobs').joinpath(file.name)
+
+            with file.open(mode='r', encoding='utf-8') as f:
+                content = f.read()
+
+            with write_path.open(mode='w', encoding='utf-8') as f:
+                f.write(content.format(saagie_prop['url_manager'],
                                        saagie_prop['saagie_user_env_name'],
                                        saagie_prop['saagie_pwd_env_name'],
                                        saagie_prop['platform_id']))
@@ -141,11 +165,6 @@ def createProject(name, path=None, ide=None):
             with write_path.open(mode='w', encoding='utf-8') as f:
                 f.write(content.format(name))
 
-        else:
-            print("Not supposed to happen ! A file was added in "
-                  "'project-template-files' that is not dealt with in this "
-                  f"code: {str(file)}")
-
     # Add project name to project properties
     saagie_prop['project_name'] = name
 
@@ -159,8 +178,19 @@ def createProject(name, path=None, ide=None):
         for file in path_to_copy.iterdir():
             # Sublime project file
             if file.name == 'project_name.sublime-project':
+                with file.open(mode='r', encoding='utf-8') as f:
+                    content = json.load(f)
+
+                # Filter to keep only the necessary build systems
+                if module == 'projects':
+                    content['build_systems'] = [content['build_systems'][0]]
+
+                if module == 'manager':
+                    content['build_systems'] = [content['build_systems'][1]]
+
                 write_path = path.joinpath(f"{name}.sublime-project")
-                shutil.copy(str(file), str(write_path))
+                with write_path.open(mode='w', encoding='utf-8') as f:
+                    json.dump(content, f, indent="\t")
 
             # Interpreter docker files
             elif file.name in ('python-docker-launch.ps1',
