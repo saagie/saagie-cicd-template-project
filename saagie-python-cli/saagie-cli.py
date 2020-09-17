@@ -1,4 +1,4 @@
-from querySaagieApi import QuerySaagieApiProject
+from querySaagieApi import QuerySaagieApiProject, QuerySaagieApi
 import argparse
 from pathlib import Path
 import json
@@ -57,6 +57,10 @@ def main():
     if args.action == 'addJob' and (not args.technology or not args.category):
         parser.error("addJob requires --technology (-t) and --category (-c)")
 
+    if args.action == 'addJob' and args.module == 'both':
+        parser.error("addJob requires the -m module argument to be eihter "
+                     "'projects' or 'manager', not 'both'")
+
     # Manage options
     if args.action == 'createProject':
         createProject(name=args.name,
@@ -65,7 +69,7 @@ def main():
                       ide=args.ide)
 
     if args.action == 'addJob':
-        addJob(name=args.name, path=args.projectPath,
+        addJob(name=args.name, path=args.projectPath, module=args.module,
                technology=args.technology, category=args.category,
                ide=args.ide, cicd=args.cicd)
 
@@ -206,8 +210,8 @@ def createProject(name, path=None, module='projects', ide=None):
     print(f'Create Project {name}')
 
 
-def addJob(name, path=None, technology='python', category='Processing',
-           ide=None, cicd=False):
+def addJob(name, path=None, module='projects', technology='python',
+           category='Processing', ide=None, cicd=False):
     print(f'Add {technology} Job {name}')
 
     if not path:
@@ -249,41 +253,101 @@ def addJob(name, path=None, technology='python', category='Processing',
     # Create Job in Saagie
     user = os.environ[saagie_prop['saagie_user_env_name']]
     password = os.environ[saagie_prop['saagie_pwd_env_name']]
-    saagie = QuerySaagieApiProject(url_saagie=saagie_prop['url'],
-                                   id_plateform=saagie_prop['platform_id'],
-                                   user=user,
-                                   password=password)
 
     file = Path(__file__).parent.joinpath(f'job-base/{technology}/__main__.py')
 
-    if technology == "python":
-        runtime_version = '3.6'
-        command_line = 'python {file}'
-        release_note = ''
-        extra_technology = ''
-        extra_technology_version = ''
+    # Job creation in projects module (v2)
+    if module == 'projects':
+        saagie = QuerySaagieApiProject(url_saagie=saagie_prop['url'],
+                                       id_plateform=saagie_prop['platform_id'],
+                                       user=user,
+                                       password=password)
 
-    elif technology == "pyspark":
-        technology = 'spark'
-        runtime_version = '2.4'
-        command_line = 'spark-submit --py-files={file} __main__.py'
-        release_note = ''
-        extra_technology = 'Python'
-        extra_technology_version = '3.6'
+        if technology == "python":
+            techno = 'python'
+            runtime_version = '3.6'
+            command_line = 'python {file}'
+            release_note = ''
+            extra_technology = ''
+            extra_technology_version = ''
 
-    job = saagie.create_job(job_name=name,
-                            project_id=saagie_prop['project_id'],
-                            file=str(file),
-                            description='desc',
-                            category=category,
-                            technology=technology,
-                            runtime_version=runtime_version,
-                            command_line=command_line,
-                            release_note=release_note,
-                            extra_technology=extra_technology,
-                            extra_technology_version=extra_technology_version)
+        elif technology == "pyspark":
+            techno = 'spark'
+            runtime_version = '2.4'
+            command_line = 'spark-submit --py-files={file} __main__.py'
+            release_note = ''
+            extra_technology = 'Python'
+            extra_technology_version = '3.6'
 
-    job_id = job['data']['createJob']['id']
+        job = saagie.create_job(job_name=name,
+                                project_id=saagie_prop['project_id'],
+                                file=str(file),
+                                description='desc',
+                                category=category,
+                                technology=techno,
+                                runtime_version=runtime_version,
+                                command_line=command_line,
+                                release_note=release_note,
+                                extra_technology=extra_technology,
+                                extra_technology_version=extra_technology_version)
+
+        job_id = job['data']['createJob']['id']
+
+    elif module == 'manager':
+        saagie = QuerySaagieApi(url_saagie=saagie_prop['url_manager'],
+                                id_plateform=saagie_prop['platform_id'],
+                                user=user,
+                                password=password)
+
+        category_v1_converter = {
+            'Extraction': 'extract',
+            'Processing': 'processing',
+            'Smart App': 'dataviz'
+        }
+
+        if technology == "python":
+            capsule_code = technology
+            category = category_v1_converter[category]
+            template = 'python {file}'
+            language_version = '3.5.2'
+            cpu = 0.3
+            memory = 512
+            disk = 512
+            extra_language = ''
+            extra_version = ''
+            # Useless with saagie-api. Hack to fill the correct version in the 
+            # gradle-job_name.properties (because of inconsistency with the use
+            # of the languageVersion element that can be the language version
+            # in python jobs or the extra language version in spark jobs)
+            gradle_job_language_version = '3.5.2'
+            gradle_job_spark_version = ''
+
+        elif technology == "pyspark":
+            capsule_code = 'spark'
+            category = category_v1_converter[category]
+            template = 'spark-submit --py-files={file} $MESOS_SANDBOX/__main__.py'
+            language_version = '2.3.0'
+            cpu = 0.3
+            memory = 512
+            disk = 512
+            extra_language = 'python'
+            extra_version = '3.5.2'
+            gradle_job_language_version = '3.5.2'
+            gradle_job_spark_version = '2.3.0'
+
+        job = saagie.create_job(job_name=name,
+                                file=str(file),
+                                capsule_code=capsule_code,
+                                category=category,
+                                template=template,
+                                language_version=language_version,
+                                cpu=cpu,
+                                memory=memory,
+                                disk=disk,
+                                extra_language=extra_language,
+                                extra_version=extra_version)
+
+        job_id = json.loads(job.content)['id']
 
     # Create job folder in 'app'
     path_to_copy = Path(__file__).parent.joinpath(f'job-base/{technology}')
@@ -296,8 +360,8 @@ def addJob(name, path=None, technology='python', category='Processing',
     path_to_copy = Path(__file__).parent.joinpath('job-template-files/')
 
     for file in path_to_copy.iterdir():
-        # gradle-job_name.properties
-        if file.name == 'gradle-job_name.properties':
+        # gradle-job_name.properties for projects (v2)
+        if file.name == 'gradle-job_name.properties' and module == 'projects':
             write_path = path.joinpath(f'saagie/jobs/gradle-{name}.properties')
 
             with file.open(mode='r', encoding='utf-8') as f:
@@ -311,14 +375,29 @@ def addJob(name, path=None, technology='python', category='Processing',
                                        runtime_version,
                                        command_line,
                                        name,
-                                       technology,
+                                       techno,
                                        extra_technology,
                                        extra_technology_version))
 
-        else:
-            print("Not supposed to happen ! A file was added in "
-                  "'job-template-files' that is not dealt with in this "
-                  f"code: {str(file)}")
+        # gradle-job_name.properties for manager (v1)
+        elif file.name == 'gradle-job_manager.properties' and module == 'manager':
+            write_path = path.joinpath(f'saagie/jobs/gradle-{name}.properties')
+
+            with file.open(mode='r', encoding='utf-8') as f:
+                content = f.read()
+
+            with write_path.open(mode='w', encoding='utf-8') as f:
+                f.write(content.format(job_id,
+                                       name,
+                                       capsule_code,
+                                       category,
+                                       extra_language,
+                                       gradle_job_language_version,
+                                       gradle_job_spark_version,
+                                       cpu,
+                                       memory,
+                                       disk,
+                                       template))
 
     # Update gitlab ci-cd file
     if cicd:
@@ -328,8 +407,15 @@ def addJob(name, path=None, technology='python', category='Processing',
             content = f.read()
 
         just_after = '  only:\n    - develop\n\ndeploy job to prod'
-        gradle_call = ('    - gradle -b saagie/jobs/build.gradle '
-                       f'projectsUpdateJob -PjobName={name} -Penv=dev\n')
+
+        if module == 'projects':
+            gradle_call = ('    - gradle -b saagie/jobs/build.gradle '
+                           f'projectsUpdateJob -PjobName={name} -Penv=dev\n')
+
+        elif module == 'manager':
+            gradle_call = ('    - gradle -b saagie/jobs/build_manager.gradle '
+                           f'updateJob -PjobName={name}\n')
+
         content = content.replace(just_after, gradle_call + just_after)
 
         with file_to_modify.open(mode='w', encoding='utf-8') as f:
@@ -347,7 +433,7 @@ def addJob(name, path=None, technology='python', category='Processing',
 
         if technology == 'python':
             docker_path = '/sandbox'
-        elif technology == 'spark':
+        elif technology == 'pyspark':
             docker_path = '/opt/spark/work-dir'
 
         local_path = '${folder}\\app'

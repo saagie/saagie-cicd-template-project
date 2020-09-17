@@ -8,7 +8,7 @@ ext.commit_message = System.getenv('CI_COMMIT_MESSAGE') + " - "+  System.getenv(
 ext.is_ci = System.getenv('CI')
 
 def releaseMessage = (is_ci != null) ? commit_message : "WIP"
-def jobLanguage = (jobType == 'spark') ? jobLanguage : null
+def jobExtraLanguage = (jobType == 'spark') ? jobExtraLanguage : null
 def jobSparkVersion = (jobType == 'spark') ? jobSparkVersion : null
 
 task packageCode(type: Zip) {{
@@ -19,7 +19,7 @@ task packageCode(type: Zip) {{
 
 saagie {{
     server {{
-        url = "{0}"
+        url = "{0}/api/v1"
         login = System.getenv('{1}')
         password = System.getenv('{2}')
         platform = {3}
@@ -28,14 +28,14 @@ saagie {{
         {{
             id = saagieJob.toInteger()
             type = jobType
-            language = jobLanguage
+            language = jobExtraLanguage
             category = jobCategory
             languageVersion = jobLanguageVersion
-            sparkVersion =jobSparkVersion
+            sparkVersion = jobSparkVersion
             cpu = jobCPU.toInteger()
             memory = jobMemory.toInteger()
             disk = jobDisk.toInteger()
-            template = jobArguments
+            template = jobTemplate
             releaseNote = releaseMessage
         }}
 
