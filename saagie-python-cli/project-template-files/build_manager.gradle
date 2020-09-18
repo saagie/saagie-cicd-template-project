@@ -32,7 +32,7 @@ saagie {{
             category = jobCategory
             languageVersion = jobLanguageVersion
             sparkVersion = jobSparkVersion
-            cpu = jobCPU.toInteger()
+            cpu = jobCPU.toFloat()
             memory = jobMemory.toInteger()
             disk = jobDisk.toInteger()
             template = jobTemplate
